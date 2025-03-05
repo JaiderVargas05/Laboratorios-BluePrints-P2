@@ -14,7 +14,7 @@ public interface BlueprintsPersistence {
      *                                       or any other low-level persistence
      *                                       error occurs.
      */
-    public Blueprint saveBlueprint(Blueprint bp) throws BlueprintPersistenceException;
+    public Blueprint saveBlueprint(Blueprint bp) throws BlueprintPersistenceException, BadRequestException;
 
     /**
      *
@@ -23,13 +23,13 @@ public interface BlueprintsPersistence {
      * @return the blueprint of the given name and author
      * @throws BlueprintNotFoundException if there is no such blueprint
      */
-    public Blueprint getBlueprint(String author, String bprintname) throws BlueprintNotFoundException;
+    public Blueprint getBlueprint(String author, String bprintname) throws BlueprintNotFoundException, BadRequestException;
 
-    public Set<Blueprint> getBlueprintsByAuthor(String author) throws BlueprintNotFoundException;
+    public Set<Blueprint> getBlueprintsByAuthor(String author) throws BlueprintNotFoundException, BadRequestException;
 
     public Set<Blueprint> getAllBluePrints() throws BlueprintNotFoundException;
 
-    public Blueprint updateBlueprint(Blueprint bp) throws BlueprintPersistenceException;
+    public Blueprint updateBlueprint(String author, String bpname, Blueprint bp) throws BlueprintNotFoundException, BadRequestException;
 
-    public void deleteBlueprint(String author, String name) throws BlueprintPersistenceException;
+    /*public void deleteBlueprint(String author, String name) throws BlueprintPersistenceException;*/
 }

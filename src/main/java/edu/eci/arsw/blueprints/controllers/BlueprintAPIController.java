@@ -31,27 +31,22 @@ public class BlueprintAPIController {
         this.blueprintServices = blueprintServices;
     }
 
-
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<Response> addNewBlueprint(@RequestBody Blueprint bpp) {
-
         Response response = blueprintServices.addNewBlueprint(bpp);
-        if(response.code!=200){
+        if(response.code!=201){
             Logger.getLogger(BlueprintAPIController.class.getName()).log(Level.SEVERE, null, response.description);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-
+            return response.code == 409 ? ResponseEntity.status(HttpStatus.CONFLICT).body(response) :
+                    ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
     @GetMapping
     public ResponseEntity<?>getAllBlueprints() {
-
         Response response =  blueprintServices.getAllBlueprints();
         if(response.code!=200){
             Logger.getLogger(BlueprintAPIController.class.getName()).log(Level.SEVERE, null, response.description);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-
         }
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -60,8 +55,8 @@ public class BlueprintAPIController {
         Response response =  blueprintServices.getBlueprintsByAuthor(author);
         if(response.code!=200){
             Logger.getLogger(BlueprintAPIController.class.getName()).log(Level.SEVERE, null, response.description);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-
+            return  response.code == 404 ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(response) :
+                    ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -70,11 +65,20 @@ public class BlueprintAPIController {
         Response response =  blueprintServices.getBlueprint(author,bpname);
         if(response.code!=200){
             Logger.getLogger(BlueprintAPIController.class.getName()).log(Level.SEVERE, null, response.description);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-
+            return response.code == 404 ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(response) :
+                    ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+    @PutMapping("/{author}/{bpname}")
+    public ResponseEntity<Response> updateBlueprint(@PathVariable String author, @PathVariable String bpname, @RequestBody Blueprint bp) {
+        Response<?> response = blueprintServices.updateBlueprint(author, bpname, bp);
+        if (response.code != 200)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
 
 }
 
