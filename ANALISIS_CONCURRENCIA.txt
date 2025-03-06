@@ -1,0 +1,60 @@
+Condiciones de carrera y solución en InMemoryBlueprintPersistence
+Condiciones de carrera
+Después de analizar el código de la clase InMemoryBlueprintPersistence, que se encarga de manejar la persistencia de los Blueprints, identificamos varias condiciones de carrera debido al uso concurrente de un Map. En este caso, la clave del Map es una tupla compuesta por el nombre del autor y el nombre del plano. A continuación, describimos los problemas detectados:
+
+    1. Condición de carrera en saveBlueprint
+
+        - Dos hilos pueden verificar simultáneamente que un Blueprint no existe y proceder a insertarlo al mismo tiempo, generando duplicados.
+    
+    2. Condición de carrera en getBlueprint y sus variantes
+
+        - Un Blueprint puede estar siendo modificado mientras otro hilo lo está leyendo, lo que puede generar datos inconsistentes.
+        - Un Blueprint puede ser eliminado justo cuando otro hilo intenta acceder a él, provocando errores.
+    
+    3. Condición de carrera en updateBlueprint
+
+        - Si un Blueprint está siendo eliminado mientras otro hilo intenta actualizarlo, la operación puede fallar o afectar la integridad de los datos.
+        - Si un usuario elimina un Blueprint mientras otro lo actualiza, se podría modificar un objeto que ya no existe.
+    
+    4. Condición de carrera en deleteBlueprint
+
+        - Si primero se verifica la existencia de un Blueprint antes de eliminarlo, otro hilo podría eliminarlo en paralelo, generando resultados inconsistentes.
+
+Debido a estas condiciones de carrera, el uso concurrente del Map puede ocasionar errores y, en casos extremos, provocar la caída del servidor.
+
+Regiones críticas
+Al identificar los problemas, podemos determinar que las regiones críticas en nuestro código son:
+
+    - El Map blueprints, ya que cualquier acceso concurrente puede provocar inconsistencias.
+    - Los propios Blueprints, que pueden ser modificados y leídos simultáneamente, generando datos incorrectos.
+
+
+Solución propuesta
+Para solucionar estos problemas, utilizaremos ConcurrentHashMap, que proporciona seguridad en entornos multihilo sin necesidad de bloquear todo el Map. Aplicaremos estrategias específicas para cada operación:
+
+    1. Uso de ConcurrentHashMap
+
+        - Reemplazamos el Map original por un ConcurrentHashMap, que permite acceso concurrente seguro sin bloquear toda la estructura de datos.
+    
+    2. Corrección en saveBlueprint con putIfAbsent
+
+        - Utilizamos putIfAbsent(), que solo inserta el Blueprint si no existe previamente.
+        - Si putIfAbsent() devuelve null, la inserción fue exitosa.
+        - Si devuelve un valor distinto de null, significa que otro hilo insertó el mismo Blueprint en paralelo, por lo que se debe lanzar una excepción.
+
+    3. Corrección en updateBlueprint con compute
+
+        - Usamos compute(), que permite actualizar un elemento de manera atómica.
+        - La función pasada a compute() verifica si el Blueprint existe:
+            + Si existingBp == null, el Blueprint no existe y se maneja el error.
+            + Si existingBp es válido, se reemplaza por la nueva versión de forma segura.
+    
+    4. Corrección en getBlueprint
+
+        - ConcurrentHashMap ya garantiza cierto nivel de seguridad en lectura concurrente.
+        - Como las modificaciones se realizan de forma atómica con compute(), las lecturas serán consistentes.
+    
+    5. Corrección en deleteBlueprint
+
+        - remove() es una operación atómica en ConcurrentHashMap, por lo que no hay riesgo de eliminar elementos mientras otros hilos acceden a ellos.
+        - Validamos si remove() devuelve null, lo que indica que otro hilo ya eliminó el Blueprint.

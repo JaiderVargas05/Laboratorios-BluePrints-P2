@@ -7,18 +7,13 @@ package edu.eci.arsw.blueprints.service;
 
 import edu.eci.arsw.blueprints.filter.Filter;
 import edu.eci.arsw.blueprints.model.Blueprint;
-import edu.eci.arsw.blueprints.model.Point;
 import edu.eci.arsw.blueprints.model.Response;
 import edu.eci.arsw.blueprints.persistence.BadRequestException;
 import edu.eci.arsw.blueprints.persistence.BlueprintNotFoundException;
 import edu.eci.arsw.blueprints.persistence.BlueprintPersistenceException;
 import edu.eci.arsw.blueprints.persistence.BlueprintsPersistence;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
@@ -127,7 +122,7 @@ public class BlueprintsServices {
         return response;
     }
 
-    /*public Response<?> deleteBlueprint(String author, String name) {
+    public Response<?> deleteBlueprint(String author, String name) {
         Response<?> response;
         try {
             this.bpp.deleteBlueprint(author, name);
@@ -136,7 +131,7 @@ public class BlueprintsServices {
             response = new Response<String>(400, e.getMessage());
         }
         return response;
-    }*/
+    }
 
     private Filter setFilter(String filter) {
         return filters.getOrDefault(filter, filters.get("default"));
