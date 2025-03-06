@@ -7,17 +7,13 @@ package edu.eci.arsw.blueprints.service;
 
 import edu.eci.arsw.blueprints.filter.Filter;
 import edu.eci.arsw.blueprints.model.Blueprint;
-import edu.eci.arsw.blueprints.model.Point;
 import edu.eci.arsw.blueprints.model.Response;
+import edu.eci.arsw.blueprints.persistence.BadRequestException;
 import edu.eci.arsw.blueprints.persistence.BlueprintNotFoundException;
 import edu.eci.arsw.blueprints.persistence.BlueprintPersistenceException;
 import edu.eci.arsw.blueprints.persistence.BlueprintsPersistence;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
@@ -38,8 +34,10 @@ public class BlueprintsServices {
         Response<?> response;
         try {
             bp = this.bpp.saveBlueprint(bp);
-            response = new Response<Blueprint>(200, bp);
+            response = new Response<Blueprint>(201, bp);
         } catch (BlueprintPersistenceException e) {
+            response = new Response<String>(409, e.getMessage());
+        } catch (BadRequestException e) {
             response = new Response<String>(400, e.getMessage());
         }
         return response;
@@ -63,6 +61,8 @@ public class BlueprintsServices {
             Blueprint bp = this.bpp.getBlueprint(author, name);
             response = new Response<Blueprint>(200, filterBlueprint.filterBlueprint(bp));
         } catch (BlueprintNotFoundException e) {
+            response = new Response<String>(404, e.getMessage());
+        } catch (BadRequestException e) {
             response = new Response<String>(400, e.getMessage());
         }
         return response;
@@ -79,7 +79,7 @@ public class BlueprintsServices {
             Set<Blueprint> bps = bpp.getAllBluePrints();
             response = new Response<Set<Blueprint>>(200, filterBlueprint.filterSet(bps));
         } catch (BlueprintNotFoundException e) {
-            response = new Response<String>(400, e.getMessage());
+            response = new Response<String>(404, e.getMessage());
         }
         return response;
     }
@@ -101,18 +101,22 @@ public class BlueprintsServices {
             Set<Blueprint> bps = this.bpp.getBlueprintsByAuthor(author);
             response = new Response<Set<Blueprint>>(200, filterBlueprint.filterSet(bps));
         } catch (BlueprintNotFoundException e) {
+            response = new Response<String>(404, e.getMessage());
+        } catch (BadRequestException e) {
             response = new Response<String>(400, e.getMessage());
         }
         return response;
     }
 
 
-    public Response<?> updateBlueprint(Blueprint bp) {
+    public Response<?> updateBlueprint(String author, String bpname, Blueprint blueprint) {
         Response<?> response;
         try {
-            bp = this.bpp.updateBlueprint(bp);
+            Blueprint bp = this.bpp.updateBlueprint(author, bpname, blueprint);
             response = new Response<Blueprint>(200, bp);
-        } catch (BlueprintPersistenceException e) {
+        } catch (BlueprintNotFoundException e) {
+            response = new Response<String>(404, e.getMessage());
+        } catch (BadRequestException e) {
             response = new Response<String>(400, e.getMessage());
         }
         return response;
