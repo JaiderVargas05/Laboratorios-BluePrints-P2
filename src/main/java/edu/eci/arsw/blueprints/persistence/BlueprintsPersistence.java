@@ -31,5 +31,5 @@ public interface BlueprintsPersistence {
 
     public Blueprint updateBlueprint(String author, String bpname, Blueprint bp) throws BlueprintNotFoundException, BadRequestException;
 
-    public void deleteBlueprint(String author, String name) throws BlueprintPersistenceException;
+    public void deleteBlueprint(String author, String name) throws BlueprintNotFoundException;
 }

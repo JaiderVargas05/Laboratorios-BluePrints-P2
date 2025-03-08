@@ -73,7 +73,8 @@ public class BlueprintAPIController {
     public ResponseEntity<Response<?>> updateBlueprint(@PathVariable String author, @PathVariable String bpname, @RequestBody Blueprint bp) {
         Response<?> response = blueprintServices.updateBlueprint(author, bpname, bp);
         if (response.code != 200)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            return response.code == 404 ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(response) :
+                    ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

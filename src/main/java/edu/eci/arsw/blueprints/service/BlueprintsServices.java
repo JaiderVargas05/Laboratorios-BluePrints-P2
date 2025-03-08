@@ -127,8 +127,8 @@ public class BlueprintsServices {
         try {
             this.bpp.deleteBlueprint(author, name);
             response = new Response<String>(200, "Blueprint deleted successfully");
-        } catch (BlueprintPersistenceException e) {
-            response = new Response<String>(400, e.getMessage());
+        } catch (BlueprintNotFoundException e) {
+            response = new Response<String>(404, e.getMessage());
         }
         return response;
     }
