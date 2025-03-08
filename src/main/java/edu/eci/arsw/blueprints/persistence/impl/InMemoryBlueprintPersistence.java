@@ -101,8 +101,7 @@ public class InMemoryBlueprintPersistence implements BlueprintsPersistence {
     }
 
     @Override
-    public Blueprint updateBlueprint(String author, String bpname, Blueprint bp)
-            throws BlueprintNotFoundException, BadRequestException {
+    public Blueprint updateBlueprint(String author, String bpname, Blueprint bp) throws BlueprintNotFoundException, BadRequestException {
         if (author == null || bpname == null) {
             throw new BadRequestException("Author and Name can't be empty.");
         }
@@ -110,18 +109,28 @@ public class InMemoryBlueprintPersistence implements BlueprintsPersistence {
             throw new BadRequestException("Blueprint can't be empty.");
         }
 
-        Tuple<String, String> key = new Tuple<>(author, bpname);
-
-        Blueprint updatedBlueprint = blueprints.compute(key, (k, existingBp) -> {
+        Tuple<String, String> oldKey = new Tuple<>(author, bpname);
+        final Blueprint[] updatedBlueprint = new Blueprint[1];
+        blueprints.compute(oldKey, (key, existingBp) -> {
             if (existingBp == null) {
+                updatedBlueprint[0] = null;
                 return null;
             }
-            return bp; // Reemplaza el blueprint existente con el nuevo
+            Tuple<String, String> newKey = new Tuple<>(bp.getAuthor(), bp.getName());
+            updatedBlueprint[0] = bp;
+            if (oldKey.equals(newKey)) {
+                return bp;
+            }
+            blueprints.remove(oldKey);
+            blueprints.put(newKey, bp);
+
+            return null;
         });
-        if (updatedBlueprint== null){
+
+        if (updatedBlueprint[0] == null){
             throw new BlueprintNotFoundException("No blueprint found.");
         }
-        return updatedBlueprint;
+        return updatedBlueprint[0];
     }
 
     @Override
