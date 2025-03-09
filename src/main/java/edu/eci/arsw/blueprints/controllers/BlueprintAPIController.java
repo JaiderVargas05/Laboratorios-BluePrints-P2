@@ -19,6 +19,7 @@ import java.util.logging.Logger;
  *
  * @author hcadavid
  */
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/v1/blueprints")
 public class BlueprintAPIController {
