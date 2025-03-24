@@ -19,6 +19,7 @@ import java.util.logging.Logger;
  *
  * @author hcadavid
  */
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/v1/blueprints")
 public class BlueprintAPIController {
@@ -72,6 +73,14 @@ public class BlueprintAPIController {
     @PutMapping("/{author}/{bpname}")
     public ResponseEntity<Response<?>> updateBlueprint(@PathVariable String author, @PathVariable String bpname, @RequestBody Blueprint bp) {
         Response<?> response = blueprintServices.updateBlueprint(author, bpname, bp);
+        if (response.code != 200)
+            return response.code == 404 ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(response) :
+                    ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+    @DeleteMapping("/{author}/{bpname}")
+    public ResponseEntity<Response<?>> deleteBlueprint(@PathVariable String author, @PathVariable String bpname) {
+        Response<?> response = blueprintServices.deleteBlueprint(author, bpname);
         if (response.code != 200)
             return response.code == 404 ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(response) :
                     ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
