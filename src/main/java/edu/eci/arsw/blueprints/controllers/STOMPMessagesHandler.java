@@ -18,19 +18,19 @@ public class STOMPMessagesHandler {
         this.messagingTemplate = messagingTemplate;
     }
 
-    @MessageMapping("/newpoint/{author}/{name}")
-    @SendTo("/topic/newpoint/{author}/{name}")
+    @MessageMapping("/newpoint.{drawingID}/{author}/{name}")
+    @SendTo("/topic/newpoint.{drawingID}/{author}/{name}")
     public PointMessage handlePointEvent(
 
         PointMessage pt,
         @DestinationVariable String author, 
-        @DestinationVariable String name
-
+        @DestinationVariable String name,
+        @DestinationVariable String drawingID
         ) throws Exception {
 
-        String topic = "/topic/newpoint/" + author + "/" + name;
-        System.out.println("Nuevo punto recibido para blueprint " + author + " - " + name + ": " + pt);
-        messagingTemplate.convertAndSend(topic, pt);
+        String topic = "/topic/newpoint." + drawingID +"/" + author + "/" + name;
+        System.out.println("Nuevo punto recibido para blueprint " + drawingID + "-" + author + " - " + name + ": " + pt);
+        //messagingTemplate.convertAndSend(topic, pt);
         return pt;
     }
 }
